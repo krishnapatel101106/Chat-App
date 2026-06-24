@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String @unique
+
+  messages    Message[]
+  room        Room[]
+  roomMembers RoomMember[]
+}
+
+model Room {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  creatorId Int
+  creator   User @relation(fields: [creatorId], references: [id])
+
+  messages    Message[]
+  roomMembers RoomMember[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  roomId Int
+  userId Int
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+}
+
+model RoomMember {
+  id Int @id @default(autoincrement())
+
+  userId Int 
+  roomId Int 
+
+  user User @relation(fields: [userId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
+
+    @@unique([userId, roomId])
+}
