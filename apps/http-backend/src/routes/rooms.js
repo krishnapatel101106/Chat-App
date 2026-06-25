@@ -4,6 +4,8 @@ const { roomSchema } = require("../validators/schema");
 const prisma = require("../../../db/client");
 const RoomRouter = express.Router();
 
+console.log(__filename);
+
 RoomRouter.post("/create", authMiddleware, async (req, res) => {
     try {
         const { success } = roomSchema.safeParse(req.body);
@@ -14,11 +16,14 @@ RoomRouter.post("/create", authMiddleware, async (req, res) => {
             });
         }
 
-        const { roomName } = req.body;
+        const { name } = req.body;
+
+        console.log(req.body);
+        console.log(req.userId);
 
         const room = await prisma.room.create({
             data: {
-                name: roomName,
+                name: name,
                 creatorId: req.userId
             }
         });
@@ -29,54 +34,56 @@ RoomRouter.post("/create", authMiddleware, async (req, res) => {
         });
 
     } catch (err) {
+        console.log(err);
         return res.status(500).json({
-            message: "Internal server error"
+            message: "Internal server error",
+            error: err.message
         });
     }
 });
 
-RoomRouter.post("/join",authMiddleware, async(req, res) => {
+RoomRouter.post("/join", authMiddleware, async (req, res) => {
     try {
         const { roomId } = req.body;
-        const userId = req.userId; //comes from middleware
+        const userId = req.userId; 
 
-       if (!roomId){
-        return res.status(400).json({
+        if (!roomId) {
+            return res.status(400).json({
                 message: "Room ID required"
             });
-       }
+        }
 
-       const room = await prisma.room.findUnique({
-        where: {id: roomId }
-       });
+        const room = await prisma.room.findUnique({
+            where: { id: roomId }
+        });
 
-       if (!room){
-        return res.status(404).json({
+        if (!room) {
+            return res.status(404).json({
                 message: "Room does not exist"
             });
-       }
+        }
 
-       const existing = await prisma.roomMember.findUnique({
-        where:{
-            userId_roomId:{
+        const existing = await prisma.roomMember.findUnique({
+            where: {
+                userId_roomId: {
+                    userId,
+                    roomId
+                }
+            }
+        });
+
+        if (existing) {
+            return res.status(409).json({
+                message: "Already in the room"
+            })
+        }
+
+        await prisma.roomMember.create({
+            data: {
                 userId,
                 roomId
             }
-        }
-       });
-
-       if (existing){
-        return res.status(409).json({
-            message:"Already in the room"
         })
-       }
-
-       await prisma.roomMember.create({
-        data:{
-            userId,
-            roomId
-        }
-       })
 
         return res.json({
             message: "Room Joined",
@@ -84,44 +91,46 @@ RoomRouter.post("/join",authMiddleware, async(req, res) => {
         })
 
     } catch (err) {
+        console.log(err);
         return res.status(500).json({
-            message: "Internal server error"
+            message: "Internal server error",
+            error: err.message
         });
     }
 });
 
-RoomRouter.post("/leave",authMiddleware, async(req, res) => {
+RoomRouter.post("/leave", authMiddleware, async (req, res) => {
     try {
         const { roomId } = req.body;
-        const userId = req.userId; 
+        const userId = req.userId;
 
-        if (!roomId){
-            return req.status(400).json({
-                message:"Room ID required"
+        if (!roomId) {
+            return res.status(400).json({
+                message: "Room ID required"
             });
         }
 
         const Exists = await prisma.roomMember.findUnique({
-            data:{
-                userId_roomId:{
-                userId,
-                roomId,
+            where: {
+                userId_roomId: {
+                    userId,
+                    roomId,
+                }
             }
-             }
         });
 
-        if (!Exists){
+        if (!Exists) {
             return res.status(400).json({
-            message: "Not in room"
-        });
+                message: "Not in room"
+            });
         }
 
         await prisma.roomMember.delete({
-            where:{
-                userId_roomId:{
-                userId,
-                roomId,
-            }
+            where: {
+                userId_roomId: {
+                    userId,
+                    roomId,
+                }
             }
         })
 
@@ -136,40 +145,40 @@ RoomRouter.post("/leave",authMiddleware, async(req, res) => {
     }
 });
 
-RoomRouter.get("/:id",authMiddleware, async(req, res) => {
+RoomRouter.get("/:id", authMiddleware, async (req, res) => {
     try {
         //const id = req.params.id; this will give you "5"
         const roomId = Number(req.params.id);
-        const userId = req.userId; 
+        const userId = req.userId;
 
-        if (!roomId){
+        if (!roomId) {
             return res.status(400).json({
-            message: "Invalid room ID"
-        });
+                message: "Invalid room ID"
+            });
         }
 
         const membership = await prisma.roomMember.findUnique({
-            where:{
-                userId_roomId:{
-                userId,
-                roomId,
-            }
+            where: {
+                userId_roomId: {
+                    userId,
+                    roomId,
+                }
             }
         })
 
-        if (!membership){
+        if (!membership) {
             return res.status(403).json({
-            message: "Access denied"
-        });
+                message: "Access denied"
+            });
         }
 
         const room = await prisma.room.findUnique({
             where: {
                 id: roomId
             },
-            include:{
-                creator:{
-                    select:{
+            include: {
+                creator: {
+                    select: {
                         id: true,
                         username: true
                     }
@@ -177,20 +186,20 @@ RoomRouter.get("/:id",authMiddleware, async(req, res) => {
             }
         })
 
-        if (!room){
+        if (!room) {
             return res.status(404).json({
-                message:"Room not found"
+                message: "Room not found"
             })
         }
 
         //50 latest msg
         const messages = await prisma.message.findMany({
-            where: {roomId },
-            orderBy: {createdAt: "desc"},
+            where: { roomId },
+            orderBy: { createdAt: "desc" },
             take: 50,
             include: {
                 user: {
-                    select:{
+                    select: {
                         id: true,
                         username: true
                     }
@@ -199,9 +208,9 @@ RoomRouter.get("/:id",authMiddleware, async(req, res) => {
         })
 
         return res.status(200).json({
-                room,
-                messages: messages.reverse()
-            })
+            room,
+            messages: messages.reverse()
+        })
 
     } catch (err) {
         console.error(err);
@@ -212,23 +221,23 @@ RoomRouter.get("/:id",authMiddleware, async(req, res) => {
     }
 });
 
-RoomRouter.get("/user",authMiddleware, async(req, res) => {
+RoomRouter.get("/user", authMiddleware, async (req, res) => {
     try {
         const userId = req.userId;
 
         const userRoom = await prisma.roomMember.findMany({
-            where: { userId},
+            where: { userId },
             include: {
                 room: true
             }
         })
 
         return res.status(200).json({
-            message:"User room fetched",
+            message: "User room fetched",
             rooms: userRoom
         })
 
-     } catch (err) {
+    } catch (err) {
         console.error(err);
 
         return res.status(500).json({
