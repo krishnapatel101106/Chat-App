@@ -1,6 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
-const prisma = require("../../../db");
+const prisma = require("../../../db/prisma");
 const { messageSchema } = require("../validators/schema");
 const messageRouter = express.Router();
 

@@ -1,7 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const { roomSchema } = require("../validators/schema");
-const prisma = require("../../../db");
+const prisma = require("../../../db/prisma");
 const RoomRouter = express.Router();
 
 console.log(__filename);

@@ -4,7 +4,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const prisma = require("../../../db");
+const prisma = require("../../../db/prisma");
 const { signupSchema, signinSchema } = require("../validators/schema");
 
 const JWT_SECRET = process.env.JWT_SECRET;
