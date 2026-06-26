@@ -16,9 +16,11 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "bcrypt": "^6.0.0",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "prisma": "6.19.3"
   },
   "dependencies": {
+    "@prisma/client": "6.19.3",
     "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.3",
     "zod": "^4.4.3"
