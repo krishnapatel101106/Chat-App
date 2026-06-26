@@ -1,6 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
-const prisma = require("../../../db/client");
+const prisma = require("../../../db");
 const userRouter = express.Router();
 
 userRouter.get("/me",authMiddleware, async(req, res) => {

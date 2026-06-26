@@ -1,8 +1,5 @@
 require("dotenv").config();
 
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
-
 const express = require("express");
 const PORT = process.env.PORT || 3000;
 
@@ -22,9 +19,3 @@ app.use("/api/v1/message", messageRouter);
 app.listen(PORT, ()=> {
     console.log(`Http Backend running on ${PORT}`);
 });
-
-process.on("beforeExit", async () => {
-    await prisma.$disconnect();
-});
-
-module.exports = prisma;

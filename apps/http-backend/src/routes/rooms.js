@@ -1,7 +1,7 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const { roomSchema } = require("../validators/schema");
-const prisma = require("../../../db/client");
+const prisma = require("../../../db");
 const RoomRouter = express.Router();
 
 console.log(__filename);
@@ -18,9 +18,6 @@ RoomRouter.post("/create", authMiddleware, async (req, res) => {
 
         const { name } = req.body;
 
-        console.log(req.body);
-        console.log(req.userId);
-
         const room = await prisma.room.create({
             data: {
                 name: name,
@@ -34,7 +31,6 @@ RoomRouter.post("/create", authMiddleware, async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err);
         return res.status(500).json({
             message: "Internal server error",
             error: err.message
@@ -91,7 +87,6 @@ RoomRouter.post("/join", authMiddleware, async (req, res) => {
         })
 
     } catch (err) {
-        console.log(err);
         return res.status(500).json({
             message: "Internal server error",
             error: err.message
@@ -213,8 +208,6 @@ RoomRouter.get("/:id", authMiddleware, async (req, res) => {
         })
 
     } catch (err) {
-        console.error(err);
-
         return res.status(500).json({
             message: "Internal server error"
         });

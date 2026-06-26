@@ -13,7 +13,6 @@ const signinSchema = z.object({
 const messageSchema = z.object({
   content: z.string().min(1),
   roomId: z.number().max(25),
-  userId: z.number().max(25)
 });
 
 const roomSchema = z.object({

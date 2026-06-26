@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const prisma = require("../../db/client");
+const prisma = require("../../../db");
 const { WebSocketServer } = require("ws");
 const jwt = require("jsonwebtoken");
 
