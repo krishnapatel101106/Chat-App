@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const PORT = process.env.PORT || 3000;
 
 const RoomRouter = require("./src/routes/rooms");
@@ -9,6 +10,7 @@ const userRouter = require("./src/routes/user");
 const messageRouter = require("./src/routes/messages");
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);

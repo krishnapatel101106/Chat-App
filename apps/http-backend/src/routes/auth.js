@@ -4,7 +4,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const prisma = require("../../../db/prisma");
+const prisma = require("../../../db/prisma/prisma");
 const { signupSchema, signinSchema } = require("../validators/schema");
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -20,10 +20,10 @@ authRouter.post("/signup", async (req, res) => {
             });
         }
 
-        const { username, password } = req.body;
+        const { name,email, password } = req.body;
 
         const existingUser = await prisma.user.findUnique({
-            where: { username }
+            where: { email }
         });
 
         if (existingUser) {
@@ -36,7 +36,8 @@ authRouter.post("/signup", async (req, res) => {
 
         await prisma.user.create({
             data: {
-                username,
+                name,
+                email,
                 password: hashedPassword
             }
         });
@@ -62,10 +63,10 @@ authRouter.post("/signin", async (req, res) => {
             });
         }
 
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
         const user = await prisma.user.findUnique({
-            where: { username }
+            where: { email }
         });
 
         if (!user) {

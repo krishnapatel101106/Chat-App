@@ -1,6 +1,6 @@
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
-const prisma = require("../../../db/prisma");
+const prisma = require("../../../db/prisma/prisma");
 const { messageSchema } = require("../validators/schema");
 const messageRouter = express.Router();
 
@@ -52,7 +52,7 @@ messageRouter.get("/:roomId", async(req, res) => {
                 user:{
                     select:{
                         id:true,
-                        username: true
+                        email: true
                     }
                 }
             },
